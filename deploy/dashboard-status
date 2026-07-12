@@ -8,7 +8,7 @@ echo
 
 systemctl is-active leidsa.service
 
-systemctl is-active kiosk.service
+pgrep chromium >/dev/null && echo "chromium: Running" || echo "chromium: Stopped"
 
 echo
 
