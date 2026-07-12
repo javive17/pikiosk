@@ -1,0 +1,57 @@
+#!/bin/bash
+
+echo
+
+echo "========== LEIDSA DASHBOARD =========="
+
+echo
+
+systemctl is-active leidsa.service
+
+systemctl is-active kiosk.service
+
+echo
+
+echo "Python"
+
+python3 --version
+
+echo
+
+echo "Gunicorn"
+
+pgrep gunicorn >/dev/null && echo Running || echo Stopped
+
+echo
+
+echo "Chromium"
+
+pgrep chromium >/dev/null && echo Running || echo Stopped
+
+echo
+
+echo "Memory"
+
+free -h
+
+echo
+
+echo "Disk"
+
+df -h /
+
+echo
+
+echo "Temperature"
+
+cat /sys/class/thermal/thermal_zone0/temp | awk '{print $1/1000" °C"}'
+
+echo
+
+echo "IP"
+
+hostname -I
+
+echo
+
+echo "======================================"

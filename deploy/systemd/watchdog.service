@@ -1,0 +1,13 @@
+[Unit]
+Description=Dashboard Watchdog
+After=kiosk.service
+
+[Service]
+User=__USER__
+
+ExecStart=/opt/leidsa-dashboard/deploy/scripts/watchdog.sh
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

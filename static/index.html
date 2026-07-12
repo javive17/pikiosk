@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Full Shop Arroyo Hondo - Resultados</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Roboto+Condensed:wght@400;700&display=swap');
+
+        :root {
+            --bg: #0d1117;
+            --bg-soft: #141c28;
+            --bg-footer: #0a0e16;
+            --line: #1e2a3a;
+            --accent: #f5a623;
+            --text: #ffffff;
+            --muted: #9aa4b2;
+            --muted-soft: #6f7b8a;
+            --success: #27ae60;
+
+            --page-max-width: 1600px;
+            --grid-gap: 8px;
+            --section-pad-x: 16px;
+            --card-pad-x: 14px;
+            --card-pad-y: 10px;
+
+            /* Balls — sized for readability at distance on mounted screen */
+            --ball-size: 96px;
+            --ball-font: 40px;
+            --small-ball-size: 96px;
+            --small-ball-font: 40px;
+            --large-ball-size: 96px;
+            --large-ball-font: 40px;
+            --featured-ball-size: 96px;
+            --featured-ball-font: 40px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        body {
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+        }
+
+        /* ── Full-screen shell ── */
+        .viewport {
+            width: 100vw; height: 100%; height: 100vh;
+            overflow: hidden;
+            display: flex; align-items: flex-start; justify-content: center;
+            background: var(--bg);
+        }
+
+        .app-shell {
+            position: relative;
+            width: min(100vw, var(--page-max-width));
+            height: 100%; height: 100vh;
+            display: flex; flex-direction: column;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        /* ── Loading overlay ── */
+        .loading-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            font-size: 20px; font-weight: 800; color: var(--accent);
+            text-align: center; padding: 24px;
+        }
+        .loading-overlay.hidden { display: none; }
+
+        /* ── Header ── */
+        .header {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .header-logo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+        .logo-box {
+            background: var(--accent); color: #000;
+            font-weight: 900; font-size: 20px; letter-spacing: 2px;
+            padding: 5px 12px; border-radius: 6px; flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 16px; font-weight: 800;
+            color: var(--accent); letter-spacing: 1px; line-height: 1.1;
+        }
+
+        .header-subtitle { font-size: 11px; color: #a9b3c4; margin-top: 2px; }
+
+        .header-time { text-align: right; flex-shrink: 0; }
+        .header-time .time-now { font-size: 26px; font-weight: 800; letter-spacing: 2px; line-height: 1; }
+        .header-time .date-now { font-size: 12px; color: #a9b3c4; margin-top: 3px; }
+        .header-time .last-update { font-size: 10px; color: var(--accent); margin-top: 4px; font-weight: 700; }
+
+        /* ══════════════════════════════════════════════════════════
+           MAIN CONTENT — two zones stacked vertically
+           ══════════════════════════════════════════════════════════ */
+        .main-content {
+            flex: 1 1 auto;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* ── TOP: rotating results panel (60% of main) ── */
+        .results-panel {
+            flex: 0 0 60%;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Each slide fills the panel absolutely */
+        .section-slide {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            background: var(--bg);
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+            z-index: 1;
+        }
+
+        /* Outgoing slide fades up */
+        .section-slide--out {
+            opacity: 0;
+            transform: translateY(-14px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Section title bar inside each slide */
+        .section-label {
+            flex-shrink: 0;
+            padding: 8px var(--section-pad-x) 7px;
+            font-size: 17px; font-weight: 800;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: var(--muted-soft);
+            background: var(--bg);
+            border-bottom: 1px solid var(--line);
+        }
+
+        /* Grid area inside a slide */
+        .slide-content {
+            flex: 1 1 0;        /* 0 base forces container-sized, not content-sized */
+            min-height: 0;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            padding-bottom: 22px; /* reserve space for rotation bar */
+        }
+
+        /* Rotation indicator bar at the very bottom of results-panel */
+        .rotation-bar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 22px;
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 14px;
+            background: var(--bg-footer);
+            border-top: 1px solid var(--line);
+            z-index: 10;
+        }
+
+        .rot-dots { display: flex; gap: 6px; flex-shrink: 0; }
+
+        .rot-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: #2a3444;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .rot-dot--active {
+            background: var(--accent);
+            transform: scale(1.25);
+        }
+
+        .rot-label {
+            font-size: 9px; font-weight: 800; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .rot-track {
+            flex: 1; height: 3px;
+            background: #1e2a3a; border-radius: 2px; overflow: hidden;
+        }
+
+        .rot-fill {
+            height: 100%; width: 0%;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ── BOTTOM: ad zone (fills rest of screen) ── */
+        .ad-zone {
+            flex: 1 1 auto;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            position: relative;
+        }
+
+        .ad-zone-label {
+            flex-shrink: 0;
+            padding: 6px var(--section-pad-x) 5px;
+            font-size: 9px; font-weight: 800;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: #2a3444;
+            border-bottom: 1px solid #151c28;
+        }
+
+        .ad-placeholder {
+            flex: 1 1 auto;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.012);
+            border: 2px dashed rgba(245,166,35,0.2);
+            color: rgba(245,166,35,0.3);
+            font-size: 11px; font-weight: 800;
+            letter-spacing: 4px; text-transform: uppercase;
+            margin: 6px;
+            border-radius: 4px;
+        }
+
+        /* ── AD: Maneja Tu Alquiler promo ── */
+        .ad-promo {
+            flex: 1 1 auto;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: space-evenly;
+            gap: 0; padding: 28px 40px;
+            background: linear-gradient(160deg, #0a1628 0%, #0d2240 50%, #0a2e1a 100%);
+            position: relative; overflow: hidden;
+            cursor: pointer; text-align: center;
+        }
+        .ad-promo::before {
+            content: ''; position: absolute; top: -100px; right: -100px;
+            width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(30,190,120,0.13) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .ad-promo::after {
+            content: ''; position: absolute; bottom: -80px; left: -80px;
+            width: 420px; height: 420px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(30,140,220,0.11) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .ad-eyebrow {
+            font-size: 13px; font-weight: 800; letter-spacing: 5px;
+            text-transform: uppercase; color: #3ecf8e;
+        }
+        .ad-logo-row { display: flex; align-items: center; gap: 20px; }
+        .ad-logo-icon {
+            width: 80px; height: 80px; border-radius: 18px;
+            background: linear-gradient(135deg, #1eb8f0, #0d8fd4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; flex-shrink: 0;
+            box-shadow: 0 6px 24px rgba(30,184,240,0.4);
+        }
+        .ad-brand-name {
+            font-size: 42px; font-weight: 900; line-height: 1;
+            background: linear-gradient(90deg, #1eb8f0, #3ecf8e);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ad-brand-sub {
+            font-size: 15px; font-weight: 700; color: #7ab8d4;
+            letter-spacing: 1px; margin-top: 5px;
+        }
+        .ad-headline {
+            font-size: 24px; font-weight: 800; color: #fff;
+            line-height: 1.4; max-width: 640px;
+        }
+        .ad-headline span { color: #3ecf8e; }
+        .ad-pills { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .ad-pill {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 30px; padding: 10px 22px;
+            font-size: 15px; font-weight: 700; color: #c8dde8;
+        }
+        .ad-cta-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
+        .ad-cta-btn {
+            background: linear-gradient(135deg, #1eb8f0, #0d8fd4);
+            color: #fff; border: none; border-radius: 12px;
+            padding: 16px 48px; font-size: 18px; font-weight: 900;
+            letter-spacing: 1px; text-transform: uppercase;
+            cursor: pointer; font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 6px 24px rgba(30,184,240,0.45);
+        }
+        .ad-url { font-size: 16px; font-weight: 800; color: #3ecf8e; letter-spacing: 1px; }
+
+        /* ── Ad slide rotation wrapper ── */
+        .ad-slide {
+            position: absolute; inset: 0;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.7s ease;
+        }
+        .ad-slide--active {
+            opacity: 1; pointer-events: auto;
+        }
+
+         /* ── Quisqueya Extra ── */
+        .ad-promo--quisqueya {
+            background: linear-gradient(145deg, #0d0600 0%, #1e0c00 40%, #2a1000 70%, #1a0800 100%);
+            cursor: default; padding: 16px 28px;
+        }
+        .ad-promo--quisqueya::before {
+            background: radial-gradient(circle at 70% 50%, rgba(212,160,23,0.22) 0%, transparent 60%);
+        }
+        .ad-promo--quisqueya::after {
+            background: radial-gradient(circle at 20% 80%, rgba(192,57,43,0.14) 0%, transparent 60%);
+        }
+        .quis-inner {
+            display: flex; align-items: stretch; justify-content: center;
+            gap: 0; width: 100%; height: 100%;
+            position: relative; z-index: 1;
+        }
+        .quis-img-col {
+            flex: 0 0 38%; display: flex; align-items: center; justify-content: center;
+            padding: 12px 0 12px 16px;
+        }
+        .quis-bottle-img {
+            height: 86%; max-height: 100%; width: auto; object-fit: contain;
+            filter: drop-shadow(0 8px 28px rgba(0,0,0,0.9));
+        }
+        .quis-text-col {
+            flex: 1 1 auto; display: flex; flex-direction: column;
+            align-items: flex-start; justify-content: center;
+            gap: 2px; padding: 16px 20px 16px 12px;
+        }
+        .quis-eyebrow {
+            font-size: clamp(9px, 1.2vh, 13px); font-weight: 800; letter-spacing: 4px;
+            text-transform: uppercase; color: #d4a017; margin-bottom: 2px;
+        }
+        .quis-brand {
+            font-size: clamp(28px, 6.5vh, 72px); font-weight: 900; color: #fff;
+            line-height: 0.95; text-shadow: 0 2px 14px rgba(0,0,0,0.7);
+        }
+        .quis-variant {
+            font-size: clamp(18px, 4vh, 46px); font-weight: 700;
+            color: #d4a017; font-style: italic; line-height: 1;
+        }
+        .quis-divider { width: 44px; height: 2px; background: #c0392b; margin: clamp(4px,1vh,10px) 0 clamp(2px,.8vh,8px); }
+        .quis-promo-label {
+            font-size: clamp(10px, 1.4vh, 14px); font-weight: 800; letter-spacing: 5px;
+            text-transform: uppercase; color: #c0392b;
+        }
+        .quis-price {
+            font-size: clamp(42px, 10vh, 100px); font-weight: 900; color: #fff;
+            line-height: 1; text-shadow: 0 0 36px rgba(212,160,23,0.55);
+        }
+        .quis-currency {
+            font-size: 0.28em; font-weight: 800; color: #d4a017;
+            vertical-align: super; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .quis-badge {
+            font-size: clamp(8px, 1vh, 11px); font-weight: 700;
+            color: rgba(255,255,255,0.45); letter-spacing: 1px; margin-top: 4px;
+        }
+        @media (max-width: 720px) {
+            .quis-img-col  { flex: 0 0 36%; padding: 8px 0 8px 10px; }
+            .quis-text-col { padding: 10px 12px 10px 8px; }
+        }
+
+        /* ── AD 2: Advertise here ── */
+        .ad-promo--advertise {
+            background: linear-gradient(160deg, #0a0a0a 0%, #111111 50%, #0d1a0d 100%);
+            cursor: pointer;
+        }
+        .ad-promo--advertise::before {
+            background: radial-gradient(circle, rgba(80,180,80,0.10) 0%, transparent 70%);
+        }
+        .ad-promo--advertise::after {
+            background: radial-gradient(circle, rgba(50,200,50,0.07) 0%, transparent 70%);
+        }
+        .ad-eyebrow--advertise {
+            font-size: 13px; font-weight: 800; letter-spacing: 5px;
+            text-transform: uppercase; color: #4caf50;
+        }
+        .ad-advertise-headline {
+            font-size: 46px; font-weight: 900; color: #fff;
+            line-height: 1.2; text-align: center;
+        }
+        .ad-advertise-accent { color: #4caf50; }
+        .ad-qr-container {
+            background: #fff; padding: 18px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 50px rgba(76,175,80,0.35);
+        }
+        .ad-qr-container canvas, .ad-qr-container img { display: block; }
+        .ad-advertise-sub {
+            font-size: 18px; font-weight: 700; color: #a8c8a8;
+            letter-spacing: 0.5px; text-align: center;
+        }
+        .ad-url--advertise { color: #4caf50; font-size: 16px; }
+
+        @media (max-width: 720px) {
+            .ad-advertise-headline { font-size: 30px; }
+            .ad-advertise-sub      { font-size: 14px; }
+        }
+
+        @media (max-width: 720px) {
+            .ad-promo            { padding: 20px 24px; }
+            .ad-eyebrow          { font-size: 11px; }
+            .ad-logo-icon        { width: 60px; height: 60px; font-size: 30px; }
+            .ad-brand-name       { font-size: 30px; }
+            .ad-brand-name--suscribe { font-size: 30px; }
+            .ad-brand-sub        { font-size: 12px; }
+            .ad-headline         { font-size: 18px; }
+            .ad-headline--suscribe { font-size: 18px; }
+            .ad-pill             { font-size: 12px; padding: 8px 16px; }
+            .ad-cta-btn          { font-size: 15px; padding: 13px 36px; }
+            .ad-url              { font-size: 13px; }
+        }
+
+        /* ── Footer ── */
+        .footer {
+            flex-shrink: 0;
+            padding: 7px 16px;
+            background: var(--bg-footer);
+            border-top: 1px solid var(--line);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; font-size: 10px; color: #606a78;
+        }
+
+        .footer-live {
+            display: flex; align-items: center; gap: 6px;
+            color: var(--success); font-weight: 800;
+        }
+
+        .live-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success);
+            animation: blink 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        /* ── Progress bar (data refresh) ── */
+        .refresh-bar {
+            position: fixed; bottom: 0; left: 0;
+            width: 0%; height: 3px;
+            background: var(--accent);
+            transition: width 0.5s linear;
+            z-index: 2000;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           LEIDSA GRIDS (inside slide 0)
+           ══════════════════════════════════════════════════════════ */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(var(--leidsa-cols, 2), minmax(0, 1fr));
+            grid-auto-rows: 1fr;
+            gap: var(--grid-gap);
+            background: var(--bg);
+            flex: 1 1 0;
+            min-height: 0;
+            padding: var(--grid-gap);
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--bg-soft);
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+            min-width: 0; display: flex; flex-direction: column;
+        }
+
+        .card-header {
+            padding: 10px 16px 8px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+
+        .card-header > div:first-child { min-width: 0; }
+
+        .card-title {
+            font-size: 20px; font-weight: 800;
+            line-height: 1.1; text-transform: uppercase; word-break: break-word;
+        }
+
+        .card-subtitle {
+            font-size: 12px; font-weight: 700; opacity: 0.85;
+            text-transform: uppercase; margin-top: 3px;
+        }
+
+        .card-provider-badge {
+            font-size: 10px; font-weight: 800;
+            background: rgba(0,0,0,0.3);
+            padding: 3px 7px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+
+        .card-body {
+            padding: var(--card-pad-y) var(--card-pad-x) 8px;
+            display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto;
+        }
+
+        /* ── Balls ── */
+        .balls-container {
+            display: flex; flex-wrap: wrap; gap: 7px;
+            align-items: center; align-content: flex-start;
+        }
+
+        .ball {
+            width: var(--ball-size); height: var(--ball-size);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: var(--ball-font);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.45);
+            flex-shrink: 0;
+        }
+
+        .ball-main {
+            background: radial-gradient(circle at 35% 35%, #ffe566, var(--accent));
+            color: #1a0a00;
+        }
+
+        .ball-bonus {
+            background: radial-gradient(circle at 35% 35%, #ff7c7c, #e53935);
+            color: #fff;
+        }
+
+        .ball-separator {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #444; align-self: center;
+        }
+
+        .balls-small .ball { width: var(--small-ball-size); height: var(--small-ball-size); font-size: var(--small-ball-font); }
+        .balls-large .ball { width: var(--large-ball-size); height: var(--large-ball-size); font-size: var(--large-ball-font); }
+
+        /* Featured card (Loto) */
+        .card-featured .card-header { padding: 12px 18px 10px; }
+        .card-featured .card-title { font-size: 28px; }
+        .card-featured .balls-container { gap: 10px; }
+        .card-featured .ball { width: var(--featured-ball-size); height: var(--featured-ball-size); font-size: var(--featured-ball-font); }
+
+        /* Kino — 10-col ball grid */
+        .card-kino .balls-container {
+            display: grid;
+            grid-template-columns: repeat(10, minmax(0, 1fr));
+            gap: 5px;
+        }
+        .card-kino .ball { width: 76px; height: 76px; aspect-ratio: 1/1; font-size: 38px; }
+
+        .draw-date { font-size: 12px; color: #8d98a7; font-weight: 700; }
+        .draw-date span { color: #c0c8d4; }
+
+        /* ══════════════════════════════════════════════════════════
+           OTRAS LOTERÍAS — mosaic flat rectangles (inside slide 1)
+           ══════════════════════════════════════════════════════════ */
+        .grid-mosaic {
+            display: grid;
+            gap: var(--grid-gap);
+            background: var(--bg);
+            grid-template-columns: repeat(var(--otras-cols, 4), minmax(0, 1fr));
+            grid-auto-rows: 1fr;
+            flex: 1 1 0;
+            min-height: 0;
+            align-content: stretch;
+            padding: var(--grid-gap);
+        }
+
+        /* Cards stretch to fill their row — no fixed aspect-ratio */
+        .grid-mosaic .card {
+            flex-direction: row;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        /* Colored title strip on the left */
+        .grid-mosaic .card-header {
+            padding: 7px 10px;
+            flex-direction: column; justify-content: center;
+            width: 44%; flex-shrink: 0;
+        }
+
+        .grid-mosaic .card-title {
+            font-size: 17px; font-weight: 900; line-height: 1.15;
+        }
+
+        .grid-mosaic .card-provider-badge {
+            font-size: 9px; padding: 2px 5px;
+            margin-top: 4px; display: inline-block;
+        }
+
+        /* Numbers on the right */
+        .grid-mosaic .card-body {
+            gap: 5px; padding: 7px 10px;
+            justify-content: center; flex: 1 1 auto;
+        }
+
+        .grid-mosaic .balls-container { min-height: unset; gap: 6px; }
+        .grid-mosaic .ball { width: 68px; height: 68px; font-size: 38px; }
+        .grid-mosaic .draw-date { font-size: 11px; }
+
+        /* ── No data ── */
+        .no-data {
+            padding: 30px; text-align: center;
+            color: #6b7686; font-size: 14px; font-weight: 700;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           RESPONSIVE — 720p portrait (primary target: 720 × 1280)
+           ══════════════════════════════════════════════════════════ */
+        @media (max-width: 720px) {
+            :root {
+                --grid-gap: 6px;
+                --section-pad-x: 12px;
+                --card-pad-x: 10px;
+                --card-pad-y: 8px;
+                --ball-size: 88px;
+                --ball-font: 36px;
+                --small-ball-size: 88px;
+                --small-ball-font: 36px;
+                --large-ball-size: 88px;
+                --large-ball-font: 36px;
+                --featured-ball-size: 88px;
+                --featured-ball-font: 36px;
+            }
+
+            .logo-box           { font-size: 17px; padding: 4px 10px; }
+            .header-title       { font-size: 14px; }
+            .header-subtitle    { font-size: 10px; }
+            .header-time .time-now    { font-size: 22px; }
+            .header-time .date-now    { font-size: 11px; }
+            .header-time .last-update { font-size: 9px; }
+
+            .section-label  { font-size: 14px; letter-spacing: 2px; }
+            .card-title     { font-size: 17px; }
+            .card-featured .card-title { font-size: 22px; }
+            .card-kino .ball { width: 64px; height: 64px; font-size: 30px; }
+
+            /* Mosaic — 3 cols on 720p */
+            .grid-mosaic { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .grid-mosaic .card-title { font-size: 14px; }
+            .grid-mosaic .ball { width: 76px; height: 76px; font-size: 38px; }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           RESPONSIVE — 1080p portrait
+           ══════════════════════════════════════════════════════════ */
+        @media (min-width: 721px) and (max-width: 1080px) {
+            :root {
+                --ball-size: 96px;
+                --ball-font: 40px;
+                --featured-ball-size: 96px;
+                --featured-ball-font: 40px;
+            }
+            .card-title                { font-size: 22px; }
+            .card-featured .card-title { font-size: 32px; }
+            .grid-mosaic               { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .grid-mosaic .card-title   { font-size: 19px; }
+            .grid-mosaic .ball         { width: 76px; height: 76px; font-size: 38px; }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           RESPONSIVE — phones <= 480px
+           ══════════════════════════════════════════════════════════ */
+        @media (max-width: 480px) {
+            :root {
+                --ball-size: 34px; --ball-font: 13px;
+                --featured-ball-size: 42px; --featured-ball-font: 16px;
+            }
+            .header { flex-wrap: wrap; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .card-featured .card-title { font-size: 18px; }
+            .card-kino .ball { width: 30px; height: 30px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+<div class="viewport">
+    <div class="app-shell" id="appShell">
+
+        <div class="loading-overlay" id="loadingOverlay">&#9203; Cargando resultados...</div>
+
+        <!-- ── Header ── -->
+        <header class="header">
+            <div class="header-logo">
+                <div class="logo-box">FULLSHOP ARROYO HONDO</div>
+                <div>
+                    <div class="header-title">Resultados en Vivo</div>
+                    <div class="header-subtitle">leidsa.com &middot; Rep&uacute;blica Dominicana</div>
+                </div>
+            </div>
+            <div class="header-time">
+                <div class="time-now" id="clockDisplay">--:--:--</div>
+                <div class="date-now" id="dateDisplay">--</div>
+                <div class="last-update" id="lastUpdateDisplay">Actualizando...</div>
+            </div>
+        </header>
+
+        <!-- ── Main ── -->
+        <main class="main-content">
+
+            <!-- TOP: rotating results panel -->
+            <div class="results-panel" id="resultsPanel">
+
+                <!-- Slide 0: LEIDSA -->
+                <div class="section-slide" id="slideLeidas">
+                    <div class="section-label">&#127919; Sorteos LEIDSA</div>
+                    <div class="slide-content" id="leidsaContent">
+                        <div class="no-data">Cargando...</div>
+                    </div>
+                </div>
+
+                <!-- Slide 1: OTRAS LOTER&#205;AS -->
+                <div class="section-slide section-slide--out" id="slideOtras">
+                    <div class="section-label">&#127922; Otras Loter&iacute;as</div>
+                    <div class="slide-content" id="otrasContent">
+                        <div class="no-data">Cargando...</div>
+                    </div>
+                </div>
+
+                <!-- Rotation indicator -->
+                <div class="rotation-bar">
+                    <div class="rot-dots">
+                        <span class="rot-dot rot-dot--active" id="dot0"></span>
+                        <span class="rot-dot" id="dot1"></span>
+                    </div>
+                    <span class="rot-label" id="rotLabel">LEIDSA</span>
+                    <div class="rot-track"><div class="rot-fill" id="rotFill"></div></div>
+                </div>
+            </div>
+
+            <!-- BOTTOM: ad zone — add more .ad-slide divs to rotate more ads -->
+            <div class="ad-zone" id="adZone">
+
+                <!-- AD 0: Maneja Tu Alquiler -->
+                <div class="ad-slide ad-slide--active" id="adSlide0">
+                    <div class="ad-promo">
+                        <div class="ad-eyebrow">&#10022; Plataforma de alquiler &middot; Rep&uacute;blica Dominicana</div>
+                        <div class="ad-logo-row">
+                            <div class="ad-logo-icon">&#127968;</div>
+                            <div>
+                                <div class="ad-brand-name">Maneja Tu Alquiler</div>
+                                <div class="ad-brand-sub">Gesti&oacute;n inteligente de propiedades</div>
+                            </div>
+                        </div>
+                        <div class="ad-headline">
+                            Administra tus propiedades en alquiler<br>
+                            de forma <span>simple y profesional</span>
+                        </div>
+                        <div class="ad-pills">
+                            <span class="ad-pill">&#128203; Contratos digitales</span>
+                            <span class="ad-pill">&#128179; Cobros &amp; pagos</span>
+                            <span class="ad-pill">&#128276; Avisos autom&aacute;ticos</span>
+                            <span class="ad-pill">&#128202; Reportes al instante</span>
+                        </div>
+                        <div class="ad-cta-row">
+                            <button class="ad-cta-btn">Comienza gratis &rarr;</button>
+                            <span class="ad-url">manejatualquiler.com.do</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AD 1: Quisqueya Extra -->
+                <div class="ad-slide" id="adSlide1">
+                    <div class="ad-promo ad-promo--quisqueya">
+                        <div class="quis-inner">
+                            <div class="quis-img-col">
+                                <img src="/static/quisqueya-bottle.png" alt="Quisqueya Extra"
+                                     class="quis-bottle-img"
+                                     onerror="this.style.display='none'"/>
+                            </div>
+                            <div class="quis-text-col">
+                                <div class="quis-eyebrow">&#127866; Cerveza Tipo Pilsener</div>
+                                <div class="quis-brand">Quisqueya</div>
+                                <div class="quis-variant">Extra</div>
+                                <div class="quis-divider"></div>
+                                <div class="quis-promo-label">Especial</div>
+                                <div class="quis-price">95<span class="quis-currency">pesos</span></div>
+                                <div class="quis-badge">&#127465;&#127476; Cerveza Dominicana &middot; 12 oz</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AD 2: Advertise here / QR -->
+                <div class="ad-slide" id="adSlide2">
+                    <div class="ad-promo ad-promo--advertise">
+                        <div class="ad-eyebrow ad-eyebrow--advertise">&#128337; Espacio publicitario disponible</div>
+                        <div class="ad-advertise-headline">
+                            &iquest;Quieres poner tu<br>
+                            <span class="ad-advertise-accent">publicidad aqu&iacute;?</span>
+                        </div>
+                        <div id="qrCode" class="ad-qr-container"></div>
+                        <div class="ad-advertise-sub">Scanea el c&oacute;digo QR para recibir informaci&oacute;n</div>
+                        <div class="ad-url ad-url--advertise">WhatsApp &middot; (809) 493-7300</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- ── Footer ── -->
+        <footer class="footer">
+            <div class="footer-live">
+                <div class="live-dot"></div>
+                EN VIVO &middot; Auto-actualizaci&oacute;n cada 2 min
+            </div>
+            <div>javive.synology.me &middot; TUDashboardRD</div>
+        </footer>
+
+    </div>
+</div>
+
+<div class="refresh-bar" id="refreshBar"></div>
+
+<script>
+    /* ── Constants ── */
+    const REFRESH_INTERVAL   = 120000;  // 2 min data refresh
+    const ROTATE_INTERVAL    = 15000;    // 15 s section rotation
+    const DASHBOARD_TIMEZONE = 'America/Santo_Domingo';
+    const SLIDE_LABELS       = ['LEIDSA', 'OTRAS'];
+
+    const GAME_ORDER = [
+        'Loto|Leidsa','KinoTV|Leidsa','Loto Pool|Leidsa',
+        'Quiniela Pale|Leidsa','Super Pale|Leidsa','Pega3Mas|Leidsa',
+        'Quiniela Pale|Loteria Nacional','Quiniela Pale|Loteria Real',
+        'Quiniela Pale|Loteka','Quiniela Pale|La Suerte','Quiniela Pale|Lotedom',
+        'Quiniela Pale|La Primera','Super Pale|La Primera','Super Pale|La Suerte',
+        'Super Pale|Loteka','Super Pale|Loteria Real','Super Pale|Lotedom'
+    ];
+
+    /* ── State ── */
+    let refreshTimeout  = null;
+    let progressTimer   = null;
+    let progressStart   = null;
+    let rotateTimeout   = null;
+    let isLoading       = false;
+    let hasRenderedOnce = false;
+    let currentSlide    = 0;
+
+    /* ── Helpers ── */
+    function escapeHtml(v) {
+        return String(v ?? '').replace(/[&<>"']/g, c =>
+            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function normalizeColor(v) {
+        const s = String(v || '').trim();
+        if (/^#[0-9a-f]{3}$/i.test(s)) return '#' + s.slice(1).split('').map(c => c+c).join('');
+        if (/^#[0-9a-f]{6}$/i.test(s)) return s;
+        return '#1560BD';
+    }
+
+    function getLabelColor(hex) {
+        const c = normalizeColor(hex);
+        const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+        return (0.299*r + 0.587*g + 0.114*b)/255 > 0.58 ? '#1a0a00' : '#ffffff';
+    }
+
+    /* ── Clock ── */
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clockDisplay').textContent =
+            now.toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:DASHBOARD_TIMEZONE});
+        const d = now.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:DASHBOARD_TIMEZONE});
+        document.getElementById('dateDisplay').textContent = d.charAt(0).toUpperCase() + d.slice(1);
+    }
+
+    /* ── Ball rendering ── */
+    function formatBall(num, isBonus) {
+        return `<div class="ball ${isBonus ? 'ball-bonus' : 'ball-main'}">${escapeHtml(num)}</div>`;
+    }
+
+    /* ── Card builder ── */
+    function buildCard(game, isMosaic) {
+        const family   = String(game.family   || '');
+        const provider = String(game.provider || '');
+        const key      = `${family}|${provider}`;
+        const isLoto   = key === 'Loto|Leidsa';
+        const isKino   = key === 'KinoTV|Leidsa';
+        const numbers  = Array.isArray(game.numbers) ? game.numbers : [];
+        const bonus    = Array.isArray(game.bonus)   ? game.bonus   : [];
+        const isSmall  = ['Quiniela Pale','Super Pale','Pega3Mas','Loto Pool'].includes(family);
+
+        let cardClass  = 'card';
+        let ballsClass = 'balls-container';
+        if (isLoto)                          cardClass  += ' card-featured';
+        if (isKino)                          cardClass  += ' card-kino';
+        if (isSmall && numbers.length <= 3)  ballsClass += ' balls-large';
+        if (numbers.length > 10)             ballsClass += ' balls-small';
+
+        const numHtml = numbers.length === 0
+            ? '<div style="color:#6f7b8a;font-size:13px;font-weight:700;">Sorteo pendiente...</div>'
+            : numbers.map(n => formatBall(n, false)).join('') +
+              (bonus.length ? '<div class="ball-separator"></div>' + bonus.map(n => formatBall(n, true)).join('') : '');
+
+        const color  = normalizeColor(game.color);
+        const lblCol = getLabelColor(color);
+        const disp   = escapeHtml(game.display || family || 'Sorteo');
+        const sub    = game.subtitle
+            ? `<div class="card-subtitle" style="color:${lblCol}cc;">${escapeHtml(game.subtitle)}</div>` : '';
+        const date   = escapeHtml(game.drawDate || 'N/D');
+        const badge  = provider === 'Leidsa' ? 'OFICIAL' : escapeHtml(provider);
+
+        return `
+            <article class="${cardClass}">
+                <div class="card-header" style="background:linear-gradient(135deg,${color}ee,${color}99);color:${lblCol};">
+                    <div>
+                        <div class="card-title">${disp}</div>
+                        ${sub}
+                    </div>
+                    <div class="card-provider-badge">${badge}</div>
+                </div>
+                <div class="card-body">
+                    <div class="${ballsClass}">${numHtml}</div>
+                    <div class="draw-date">&#128197; <span>${date}</span></div>
+                </div>
+            </article>`;
+    }
+
+    /* ── Render into respective slide containers ── */
+    function renderDashboard(data) {
+        const games = Array.isArray(data?.games)
+            ? data.games.filter(g => g && typeof g === 'object') : [];
+
+        if (games.length === 0) {
+            document.getElementById('leidsaContent').innerHTML =
+            document.getElementById('otrasContent').innerHTML  = '<div class="no-data">No hay resultados disponibles</div>';
+            document.getElementById('lastUpdateDisplay').textContent = 'Sin resultados disponibles';
+            return;
+        }
+
+        /* Order games */
+        const gameMap = new Map();
+        games.forEach(g => { if (g.family && g.provider) gameMap.set(`${g.family}|${g.provider}`, g); });
+        const ordered = [];
+        GAME_ORDER.forEach(k  => { if (gameMap.has(k)) ordered.push(gameMap.get(k)); });
+        games.forEach(g       => { const k = `${g.family}|${g.provider}`; if (!GAME_ORDER.includes(k)) ordered.push(g); });
+
+        /* Split */
+        const leidsaAll    = ordered.filter(g => g.provider === 'Leidsa');
+        const loto         = leidsaAll.find(g => g.family === 'Loto');
+        const kino         = leidsaAll.find(g => g.family === 'KinoTV');
+        const leidsaOthers = leidsaAll.filter(g => !['Loto','KinoTV'].includes(g.family));
+        const otherLots    = ordered.filter(g => g.provider !== 'Leidsa');
+
+        /* Leidsa slide */
+        let lHtml = '';
+        if (loto || kino) {
+            lHtml += '<div class="grid-2">';
+            if (loto) lHtml += buildCard(loto);
+            if (kino) lHtml += buildCard(kino);
+            lHtml += '</div>';
+        }
+        if (leidsaOthers.length) {
+            lHtml += '<div class="grid-2">';
+            lHtml += leidsaOthers.map(g => buildCard(g)).join('');
+            lHtml += '</div>';
+        }
+        document.getElementById('leidsaContent').innerHTML = lHtml || '<div class="no-data">Sin datos</div>';
+
+        /* Otras slide */
+        document.getElementById('otrasContent').innerHTML = otherLots.length
+            ? '<div class="grid-mosaic">' + otherLots.map(g => buildCard(g, true)).join('') + '</div>'
+            : '<div class="no-data">Sin otras loterias disponibles</div>';
+
+        /* Timestamp */
+        const ts = data?.lastUpdated
+            ? `\u2705 Actualizado: ${data.lastUpdated}`
+            : `\u2705 ${new Date().toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:DASHBOARD_TIMEZONE})}`;
+        document.getElementById('lastUpdateDisplay').textContent = ts;
+        hasRenderedOnce = true;
+        requestAnimationFrame(autoFitLayout);
+    }
+
+    /* ══ SECTION ROTATION ══ */
+    function showSlide(index) {
+        [document.getElementById('slideLeidas'), document.getElementById('slideOtras')]
+            .forEach((s, i) => s.classList.toggle('section-slide--out', i !== index));
+        [document.getElementById('dot0'), document.getElementById('dot1')]
+            .forEach((d, i) => d.classList.toggle('rot-dot--active', i === index));
+        document.getElementById('rotLabel').textContent = SLIDE_LABELS[index];
+    }
+
+    function startRotationProgress() {
+        const fill = document.getElementById('rotFill');
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+        void fill.offsetWidth;
+        fill.style.transition = `width ${ROTATE_INTERVAL}ms linear`;
+        fill.style.width = '100%';
+    }
+
+    function scheduleRotation() {
+        if (rotateTimeout) clearTimeout(rotateTimeout);
+        startRotationProgress();
+        rotateTimeout = setTimeout(() => {
+            currentSlide = currentSlide === 0 ? 1 : 0;
+            showSlide(currentSlide);
+            scheduleRotation();
+        }, ROTATE_INTERVAL);
+    }
+
+    /* ══ DATA REFRESH PROGRESS BAR ══ */
+    function startProgressBar() {
+        const bar = document.getElementById('refreshBar');
+        bar.style.transition = 'none'; bar.style.width = '0%';
+        void bar.offsetWidth;
+        bar.style.transition = 'width 0.5s linear';
+        progressStart = Date.now();
+        if (progressTimer) clearInterval(progressTimer);
+        progressTimer = setInterval(() => {
+            const pct = Math.min(100, (Date.now() - progressStart) / REFRESH_INTERVAL * 100);
+            bar.style.width = `${pct}%`;
+            if (pct >= 100) clearInterval(progressTimer);
+        }, 500);
+    }
+
+    function scheduleNextRefresh() {
+        if (refreshTimeout) clearTimeout(refreshTimeout);
+        refreshTimeout = setTimeout(loadData, REFRESH_INTERVAL);
+        startProgressBar();
+    }
+
+    /* ══ DATA LOADING ══ */
+    async function loadData() {
+        if (isLoading) return;
+        isLoading = true;
+        const overlay = document.getElementById('loadingOverlay');
+        try {
+            if (!hasRenderedOnce) {
+                overlay.textContent = '\u23F3 Cargando resultados...';
+                overlay.classList.remove('hidden');
+            }
+            const res = await fetch('/api/results', { cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            renderDashboard(await res.json());
+            overlay.classList.add('hidden');
+        } catch (err) {
+            console.error('Error loading data:', err);
+            if (!hasRenderedOnce) {
+                overlay.textContent = '\u26A0\uFE0F Error cargando datos \u00B7 reintentando...';
+                overlay.classList.remove('hidden');
+            } else {
+                document.getElementById('lastUpdateDisplay').textContent = '\u26A0\uFE0F Error \u00B7 reintentando...';
+            }
+        } finally {
+            isLoading = false;
+            scheduleNextRefresh();
+        }
+    }
+
+    /* ══ AUTO-FIT LAYOUT ══════════════════════════════════════════
+       Measures actual rendered card dimensions — no estimating.
+       Two-phase: set Otras column count → repaint → measure real heights.
+       ═══════════════════════════════════════════════════════════ */
+    function getStyleTag() {
+        let t = document.getElementById('autofit-style');
+        if (!t) { t = document.createElement('style'); t.id = 'autofit-style'; document.head.appendChild(t); }
+        return t;
+    }
+
+    function fitLeidsaBalls() {
+        // Leidsa cards use CSS defaults + flex-wrap (no auto-fit)
+        // Only the Kino 10-col grid needs dynamic sizing
+
+        // ── Kino card (10-col grid, width is the constraint) ──
+        const kinoBody = document.querySelector('#leidsaContent .card-kino .card-body');
+        if (kinoBody) {
+            const kH    = Math.max(kinoBody.clientHeight - DATE_H, 20);
+            const kW    = kinoBody.clientWidth - PAD_X * 2;
+            const byW   = Math.floor((kW - 9 * 5) / 10);   // 10 cols, 9 gaps of 5px
+            const kSize = Math.max(Math.min(kH, byW), 18);
+            const kFont = Math.round(kSize * 0.52);
+            getStyleTag().textContent =
+                `.card-kino .ball{width:${kSize}px!important;height:${kSize}px!important;` +
+                `font-size:${kFont}px!important}`;
+        }
+    }
+
+    function fitOtrasGrid() {
+        const root  = document.documentElement;
+        const GAP   = 8;
+
+        const grid = document.querySelector('#otrasContent .grid-mosaic');
+        if (!grid) return;
+        const count = grid.querySelectorAll('.card').length;
+        if (!count) return;
+
+        // Measure from the results-panel directly — always visible, always has height
+        const panel    = document.querySelector('.results-panel');
+        const labelEl  = document.querySelector('#slideOtras .section-label');
+        if (!panel) return;
+        const panelH   = panel.clientHeight;
+        const labelH   = labelEl ? labelEl.offsetHeight : 36;
+        const rotBarH  = 22;
+        const usableH  = panelH - labelH - rotBarH - GAP * 2;
+
+        // Pick column count so every row is at least 52px tall
+        let cols = 4;
+        for (let c = 3; c <= 8; c++) {
+            const rows = Math.ceil(count / c);
+            const rowH = (usableH - (rows - 1) * GAP) / rows;
+            if (rowH >= 52) { cols = c; break; }
+        }
+        root.style.setProperty('--otras-cols', String(cols));
+
+        // Also force the grid inline so it takes effect immediately
+        grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+        // Wait 80ms for full reflow on slow hardware (Orange Pi), then measure real card
+        setTimeout(() => {
+            const card = grid.querySelector('.card');
+            const body = grid.querySelector('.card-body');
+            if (!card || !body) return;
+
+            const cardH = card.clientHeight;
+            const bodyW = body.clientWidth;
+            const balls = body.querySelectorAll('.ball');
+            const n     = Math.max(balls.length, 1);
+            const byH   = Math.max(cardH - 18, 16);
+            const byW   = Math.floor((bodyW - 10 - 6 * (n - 1)) / n);
+            const mSize = Math.max(Math.min(byH, byW), 16);
+            const mFont = Math.round(mSize * 0.55);
+
+            const t = getStyleTag();
+            // Keep kino rule, replace mosaic rule
+            const kino = (t.textContent.match(/\.card-kino \.ball\{[^}]*\}/) || [''])[0];
+            t.textContent = kino +
+                `.grid-mosaic .ball{width:${mSize}px!important;height:${mSize}px!important;` +
+                `font-size:${mFont}px!important}`;
+        }, 80);
+    }
+
+    function autoFitLayout() {
+        // Double rAF — first frame commits column changes, second frame measures
+        requestAnimationFrame(() => {
+            fitOtrasGrid();   // sets --otras-cols, then measures after its own rAF
+            requestAnimationFrame(fitLeidsaBalls);
+        });
+    }
+
+    let _resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(_resizeTimer);
+        _resizeTimer = setTimeout(autoFitLayout, 120);
+    });
+
+    /* ══ INIT ══ */
+    window.addEventListener('load', () => {
+        updateClock();
+        loadData();
+        scheduleRotation();
+        buildQR();
+        requestAnimationFrame(autoFitLayout);
+        if (document.fonts?.ready) document.fonts.ready.then(() => {});
+    });
+
+    /* ══ AD ROTATION ══ */
+    const AD_ROTATE_INTERVAL = 10000; // 10 s per ad
+    let currentAd = 0;
+
+    function rotateAds() {
+        const slides = document.querySelectorAll('.ad-slide');
+        if (slides.length < 2) return;
+        slides[currentAd].classList.remove('ad-slide--active');
+        currentAd = (currentAd + 1) % slides.length;
+        slides[currentAd].classList.add('ad-slide--active');
+    }
+
+    setInterval(rotateAds, AD_ROTATE_INTERVAL);
+
+    /* ══ QR CODE ══ */
+    function buildQR() {
+        const el = document.getElementById('qrCode');
+        if (!el || !window.QRCode) return;
+        // Size: large for vertical screen readability
+        const size = Math.min(Math.round(window.innerHeight * 0.17), 260);
+        new QRCode(el, {
+            text: 'https://wa.me/18094937300',
+            width:  size,
+            height: size,
+            colorDark:  '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[Unit]
+Description=LEIDSA Dashboard
+After=network.target
+
+[Service]
+User=__USER__
+WorkingDirectory=/opt/leidsa-dashboard
+
+Environment=PYTHONUNBUFFERED=1
+
+ExecStart=/opt/leidsa-dashboard/venv/bin/gunicorn \
+--workers 1 \
+--threads 4 \
+--bind 0.0.0.0:5000 \
+--timeout 60 \
+app:app
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

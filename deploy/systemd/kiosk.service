@@ -1,0 +1,14 @@
+[Unit]
+Description=LEIDSA Chromium Kiosk
+After=graphical.target leidsa.service
+
+[Service]
+User=__USER__
+Environment=DISPLAY=:0
+ExecStart=/opt/leidsa-dashboard/deploy/scripts/autostart.sh
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target
