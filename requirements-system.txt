@@ -1,6 +1,0 @@
-Python 3.11
-Flask
-Gunicorn
-Chromium
-Openbox
-X11
