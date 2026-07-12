@@ -133,15 +133,8 @@ cat > "$USER_HOME/.config/openbox/autostart" << OBAUTOSTART
 $INSTALL_DIR/deploy/scripts/disable-blanking.sh &
 $INSTALL_DIR/deploy/scripts/rotate-display.sh &
 unclutter -idle 0.5 &
-sleep 3
-/snap/bin/chromium \\
-    --kiosk --start-fullscreen --no-first-run \\
-    --disable-infobars --disable-session-crashed-bubble \\
-    --disable-features=Translate \\
-    --overscroll-history-navigation=0 \\
-    --block-new-web-contents \\
-    http://localhost:5000 &
-$INSTALL_DIR/deploy/scripts/watchdog.sh &
+sleep 5
+exec $INSTALL_DIR/deploy/scripts/watchdog.sh
 OBAUTOSTART
 chmod +x "$USER_HOME/.config/openbox/autostart"
 chown -R "$USERNAME:$USERNAME" "$USER_HOME/.bash_profile" "$USER_HOME/.xinitrc" "$USER_HOME/.config"

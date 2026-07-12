@@ -836,7 +836,7 @@
 <script>
     /* ── Constants ── */
     const REFRESH_INTERVAL   = 120000;  // 2 min data refresh
-    const ROTATE_INTERVAL    = 15000;    // 15 s section rotation
+    const ROTATE_INTERVAL    = 60000;    // 60 s section rotation
     const DASHBOARD_TIMEZONE = 'America/Santo_Domingo';
     const SLIDE_LABELS       = ['LEIDSA', 'OTRAS'];
 
@@ -1177,7 +1177,7 @@
     });
 
     /* ══ AD ROTATION ══ */
-    const AD_ROTATE_INTERVAL = 10000; // 10 s per ad
+    const AD_ROTATE_INTERVAL = 40000; // 40 s per ad (2 min for 3 ads)
     let currentAd = 0;
 
     function rotateAds() {
