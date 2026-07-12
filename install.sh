@@ -97,11 +97,13 @@ SCRIPT
 
 chmod +x "$INSTALL_DIR/deploy/scripts/"*.sh
 
-info "Installing systemd service..."
+info "Installing systemd services..."
 cp "$INSTALL_DIR/deploy/systemd/leidsa.service" /etc/systemd/system/
 sed -i "s/__USER__/$USERNAME/g" /etc/systemd/system/leidsa.service
+cp "$INSTALL_DIR/deploy/systemd/fallback-ip.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable leidsa.service
+systemctl enable fallback-ip.service
 
 info "Configuring autologin..."
 mkdir -p /etc/systemd/system/getty@tty1.service.d

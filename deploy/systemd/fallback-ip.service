@@ -1,0 +1,12 @@
+[Unit]
+Description=Static fallback IP address (192.168.1.250)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/leidsa-dashboard/deploy/scripts/set-fallback-ip.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
