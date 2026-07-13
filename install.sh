@@ -250,29 +250,12 @@ sed -i "s/__USER__/$USERNAME/g" /etc/systemd/system/leidsa.service
 # fallback-ip.service
 cp "$INSTALL_DIR/deploy/systemd/fallback-ip.service" /etc/systemd/system/
 
-# kiosk.service (Firefox kiosk — simple Restart=always)
-cat > /etc/systemd/system/kiosk.service << 'KIOSK_SVC'
-[Unit]
-Description=LEIDSA Kiosk Browser
-After=graphical.target
-Requires=leidsa.service
-
-[Service]
-Environment=DISPLAY=:0
-ExecStart=/opt/leidsa-dashboard/deploy/scripts/autostart.sh
-Restart=always
-RestartSec=5
-User=__USER__
-
-[Install]
-WantedBy=graphical.target
-KIOSK_SVC
-sed -i "s/__USER__/$USERNAME/g" /etc/systemd/system/kiosk.service
-
 systemctl daemon-reload
 systemctl enable leidsa.service
 systemctl enable fallback-ip.service
-systemctl enable kiosk.service
+
+# Note: kiosk.service not used — Firefox is launched via openbox autostart
+# (watchdog.sh runs in a blocking loop, systemd isn't needed)
 
 # --------------------------------------------------
 # 8. Autologin
@@ -363,13 +346,12 @@ chown -R "$USERNAME:$USERNAME" "$INSTALL_DIR"
 info "Starting services..."
 systemctl start leidsa.service
 systemctl start fallback-ip.service
-systemctl start kiosk.service
 
 info ""
 info "=== INSTALLATION COMPLETE ==="
 info ""
 info "  Backend:  http://localhost:5000 (Flask + Gunicorn)"
-info "  Kiosk:    systemd kiosk.service (Firefox, Restart=always)"
+info "  Kiosk:    openbox autostart → watchdog.sh → Firefox"
 info "  Fallback: 192.168.1.250/24 on eth0"
 info ""
 echo -e "  ${YELLOW}Reboot now?${NC} [y/N] \c"
