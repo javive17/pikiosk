@@ -1,19 +1,18 @@
 #!/bin/bash
+# Direct kiosk launcher for use with systemd kiosk.service
+# Runs in foreground so systemd can track and restart it
 export DISPLAY=:0
-xset s off
-xset -dpms
-xset s noblank
-unclutter -idle 0.5 &
-OUTPUT=$(xrandr | grep " connected" | head -1 | cut -d" " -f1)
-[ -n "$OUTPUT" ] && xrandr --output "$OUTPUT" --rotate right
-sleep 2
-/snap/bin/chromium \
---kiosk \
---start-fullscreen \
---no-first-run \
---disable-infobars \
---disable-session-crashed-bubble \
---disable-features=Translate \
---overscroll-history-navigation=0 \
---block-new-web-contents \
-http://localhost:5000
+
+# Ensure X is ready
+sleep 3
+
+# Kill stale Firefox processes (avoid multiple instances)
+pkill -9 firefox 2>/dev/null || true
+sleep 1
+
+exec firefox \
+    --kiosk \
+    --no-remote \
+    --new-instance \
+    --profile /opt/leidsa-dashboard/firefox-profile \
+    http://localhost:5000

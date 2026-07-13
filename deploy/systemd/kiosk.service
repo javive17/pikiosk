@@ -1,0 +1,14 @@
+[Unit]
+Description=LEIDSA Kiosk Browser
+After=graphical.target
+Requires=leidsa.service
+
+[Service]
+Environment=DISPLAY=:0
+ExecStart=/opt/leidsa-dashboard/deploy/scripts/autostart.sh
+Restart=always
+RestartSec=5
+User=__USER__
+
+[Install]
+WantedBy=graphical.target

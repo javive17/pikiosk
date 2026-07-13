@@ -8,7 +8,7 @@ echo
 
 systemctl is-active leidsa.service
 
-pgrep chromium >/dev/null && echo "chromium: Running" || echo "chromium: Stopped"
+pgrep firefox >/dev/null && echo "firefox: Running" || echo "firefox: Stopped"
 
 echo
 
@@ -24,9 +24,9 @@ pgrep gunicorn >/dev/null && echo Running || echo Stopped
 
 echo
 
-echo "Chromium"
+echo "Firefox"
 
-pgrep chromium >/dev/null && echo Running || echo Stopped
+pgrep firefox >/dev/null && echo Running || echo Stopped
 
 echo
 

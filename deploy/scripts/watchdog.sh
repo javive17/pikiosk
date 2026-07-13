@@ -1,14 +1,19 @@
 #!/bin/bash
-# Blocking Chromium launcher — runs in foreground, auto-restarts on crash.
-# No polling, no fork bomb. Use this directly in openbox autostart.
+# Blocking Firefox kiosk launcher
+# Runs in foreground — openbox waits on this.
+# No polling, no fork bomb.
 export DISPLAY=:0
+
+# Kill stale Firefox processes (avoid multiple instances)
+pkill -9 firefox 2>/dev/null || true
+sleep 2
+
 while true; do
-    /snap/bin/chromium \
-        --kiosk --start-fullscreen --no-first-run \
-        --disable-infobars --disable-session-crashed-bubble \
-        --disable-features=Translate \
-        --overscroll-history-navigation=0 \
-        --block-new-web-contents \
+    firefox \
+        --kiosk \
+        --no-remote \
+        --new-instance \
+        --profile /opt/leidsa-dashboard/firefox-profile \
         http://localhost:5000
     sleep 5
 done

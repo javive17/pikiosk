@@ -14,10 +14,6 @@ if [ -d .git ]; then
     git pull
 fi
 
-source venv/bin/activate
-
-pip install -r requirements.txt
-
 sudo systemctl start leidsa.service
 
 echo
