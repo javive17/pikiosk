@@ -112,6 +112,10 @@ mkdir -p "$FF_PROFILE"
 cat > "$FF_PROFILE/user.js" << 'FIREFOX_JS'
 user_pref("dom.disable_open_during_load", true);
 user_pref("browser.sessionstore.resume_from_crash", false);
+user_pref("browser.sessionstore.resume_session_once", false);
+user_pref("browser.sessionstore.max_tabs_undo", 0);
+user_pref("browser.sessionstore.max_windows_undo", 0);
+user_pref("browser.sessionstore.restore_tabs_lazily", false);
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.privatebrowsing.autostart", true);
 user_pref("browser.startup.page", 0);
@@ -131,6 +135,19 @@ user_pref("datareporting.policy.dataSubmissionEnabled", false);
 user_pref("browser.tabs.allowTabDetach", false);
 user_pref("browser.tabs.closeWindowWithLastTab", false);
 user_pref("dom.disable_beforeunload", true);
+user_pref("browser.newtabpage.enabled", false);
+user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
+user_pref("browser.newtabpage.activity-stream.feeds.snippets", false);
+user_pref("browser.laterrun.enabled", false);
+user_pref("browser.messaging-system.whatsNewPanel.enabled", false);
+user_pref("startup.homepage_welcome_url", "");
+user_pref("startup.homepage_welcome_url.additional", "");
+user_pref("browser.uitour.enabled", false);
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("browser.startup.firstrunSkipsHomepage", false);
+user_pref("browser.suppress_first_window_animation", true);
+user_pref("browser.startup.blankWindow", false);
+user_pref("toolkit.startup.max_resumed_crashes", -1);
 FIREFOX_JS
 
 chown -R "$USERNAME:$USERNAME" "$FF_PROFILE"
@@ -168,21 +185,33 @@ SCRIPT
 cat > "$INSTALL_DIR/deploy/scripts/watchdog.sh" << 'SCRIPT'
 #!/bin/bash
 # Blocking Firefox kiosk launcher
-# Runs in foreground — systemd or openbox waits on this.
+# Runs in foreground — openbox waits on this.
 # No polling, no fork bomb.
 export DISPLAY=:0
 
-# Kill stale Firefox processes (avoid multiple instances)
+PROFILE=/opt/leidsa-dashboard/firefox-profile
+URL=http://localhost:5000
+
+# Kill stale Firefox processes
 pkill -9 firefox 2>/dev/null || true
 sleep 2
+
+# Pre-initialize profile to skip first-run wizard
+if [ ! -f "$PROFILE/.initialized" ]; then
+    echo "Pre-initializing Firefox profile..."
+    timeout 15 firefox --headless --no-remote --profile "$PROFILE" --first-startup about:blank 2>/dev/null || true
+    pkill -9 firefox 2>/dev/null || true
+    touch "$PROFILE/.initialized"
+    sleep 2
+fi
 
 while true; do
     firefox \
         --kiosk \
         --no-remote \
         --new-instance \
-        --profile /opt/leidsa-dashboard/firefox-profile \
-        http://localhost:5000
+        --profile "$PROFILE" \
+        "$URL"
     sleep 5
 done
 SCRIPT
