@@ -247,15 +247,19 @@ info "Installing systemd services..."
 cp "$INSTALL_DIR/deploy/systemd/leidsa.service" /etc/systemd/system/
 sed -i "s/__USER__/$USERNAME/g" /etc/systemd/system/leidsa.service
 
-# fallback-ip.service
-cp "$INSTALL_DIR/deploy/systemd/fallback-ip.service" /etc/systemd/system/
-
 systemctl daemon-reload
 systemctl enable leidsa.service
-systemctl enable fallback-ip.service
 
-# Note: kiosk.service not used — Firefox is launched via openbox autostart
-# (watchdog.sh runs in a blocking loop, systemd isn't needed)
+# Note: Firefox kiosk is launched via openbox autostart
+# (watchdog.sh runs in a blocking loop in foreground).
+# No systemd service needed — systemd can't track Firefox reliably
+# because it daemonizes, and the openbox autostart approach is simpler.
+
+# --------------------------------------------------
+# 8. Configure fallback IP via NetworkManager
+# --------------------------------------------------
+info "Configuring fallback IP via NetworkManager..."
+bash "$INSTALL_DIR/deploy/scripts/set-fallback-ip.sh"
 
 # --------------------------------------------------
 # 8. Autologin
