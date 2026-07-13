@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Full Shop Arroyo Hondo - Resultados</title>
     <base target="_self">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>window.open = function() { return null; }</script>
 
@@ -411,6 +412,62 @@
         }
         .ad-url--advertise { color: #4caf50; font-size: 16px; }
 
+        /* ── AD 3: MiCita ── */
+        .ad-promo--micita {
+            background: linear-gradient(160deg, #0b1a2e 0%, #0f2440 30%, #0d1a2a 70%, #0a1220 100%);
+            cursor: pointer; padding: 24px 36px;
+        }
+        .ad-promo--micita::before {
+            background: radial-gradient(circle at 80% 20%, rgba(52,152,219,0.18) 0%, transparent 60%);
+        }
+        .ad-promo--micita::after {
+            background: radial-gradient(circle at 20% 80%, rgba(39,174,96,0.10) 0%, transparent 60%);
+        }
+        .ad-logo-icon--micita {
+            width: 80px; height: 80px; border-radius: 18px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; flex-shrink: 0;
+            box-shadow: 0 6px 24px rgba(52,152,219,0.4);
+        }
+        .ad-brand-name--micita {
+            font-size: 42px; font-weight: 900; line-height: 1;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ad-brand-sub--micita {
+            font-size: 15px; font-weight: 700; color: #7fb3d8;
+            letter-spacing: 1px; margin-top: 5px;
+        }
+        .ad-headline--micita { font-size: 22px; }
+        .ad-headline--micita span { color: #5dade2; }
+        .ad-pill--micita {
+            background: rgba(52,152,219,0.12);
+            border: 1px solid rgba(52,152,219,0.25);
+            color: #b8d8f0;
+        }
+        .ad-cta-btn--micita {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 6px 24px rgba(52,152,219,0.45);
+        }
+        .ad-url--micita { color: #5dade2; }
+        .ad-wa-row {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 15px; font-weight: 700; color: #7fb3d8;
+        }
+        .ad-wa-row i { font-size: 20px; }
+
+        @media (max-width: 720px) {
+            .ad-logo-icon--micita  { width: 60px; height: 60px; font-size: 30px; }
+            .ad-brand-name--micita { font-size: 30px; }
+            .ad-brand-sub--micita  { font-size: 12px; }
+            .ad-headline--micita   { font-size: 18px; }
+            .ad-pill--micita       { font-size: 12px; padding: 8px 16px; }
+            .ad-cta-btn--micita    { font-size: 15px; padding: 13px 36px; }
+            .ad-url--micita        { font-size: 13px; }
+        }
+
         @media (max-width: 720px) {
             .ad-advertise-headline { font-size: 30px; }
             .ad-advertise-sub      { font-size: 14px; }
@@ -815,6 +872,37 @@
                     </div>
                 </div>
 
+                <!-- AD 3: MiCita -->
+                <div class="ad-slide" id="adSlide3">
+                    <div class="ad-promo ad-promo--micita">
+                        <div class="ad-eyebrow">&#10022; Software de Agenda &middot; Rep&uacute;blica Dominicana</div>
+                        <div class="ad-logo-row">
+                            <div class="ad-logo-icon ad-logo-icon--micita"><i class="fa-regular fa-calendar-check"></i></div>
+                            <div>
+                                <div class="ad-brand-name ad-brand-name--micita">MiCita</div>
+                                <div class="ad-brand-sub ad-brand-sub--micita">Digitalizando negocios, una cita a la vez</div>
+                            </div>
+                        </div>
+                        <div class="ad-headline ad-headline--micita">
+                            Agenda <span>inteligente</span> con recordatorios por WhatsApp<br>
+                            para m&eacute;dicos, salones, gimnasios y m&aacute;s
+                        </div>
+                        <div class="ad-pills">
+                            <span class="ad-pill ad-pill--micita">&#128197; Calendario inteligente</span>
+                            <span class="ad-pill ad-pill--micita">&#128242; Recordatorios WhatsApp</span>
+                            <span class="ad-pill ad-pill--micita">&#128100; Gesti&oacute;n de clientes</span>
+                            <span class="ad-pill ad-pill--micita">&#128179; Control de pagos</span>
+                        </div>
+                        <div class="ad-cta-row">
+                            <button class="ad-cta-btn ad-cta-btn--micita">Prueba gratis &rarr;</button>
+                            <span class="ad-url ad-url--micita">micita.com.do</span>
+                        </div>
+                        <div class="ad-wa-row">
+                            <i class="fa-brands fa-whatsapp"></i> (829) 358-7300
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </main>
@@ -1177,7 +1265,7 @@
     });
 
     /* ══ AD ROTATION ══ */
-    const AD_ROTATE_INTERVAL = 40000; // 40 s per ad (2 min for 3 ads)
+    const AD_ROTATE_INTERVAL = 30000; // 30 s per ad (2 min for 4 ads)
     let currentAd = 0;
 
     function rotateAds() {
