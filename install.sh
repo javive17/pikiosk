@@ -37,7 +37,7 @@ apt-get install -y -qq \
     python3 python3-pip python3-venv python3-dev \
     xserver-xorg x11-xserver-utils xinit openbox \
     unclutter curl wget git \
-    fonts-dejavu fonts-liberation-fonts fonts-noto
+    fonts-dejavu fonts-liberation fonts-noto
 
 if ! command -v chromium &>/dev/null; then
     if command -v snapctl &>/dev/null; then
