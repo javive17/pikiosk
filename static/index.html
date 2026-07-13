@@ -447,11 +447,20 @@
             border: 1px solid rgba(52,152,219,0.25);
             color: #b8d8f0;
         }
-        .ad-cta-btn--micita {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            box-shadow: 0 6px 24px rgba(52,152,219,0.45);
+        .ad-qr-container--micita {
+            background: #fff; padding: 14px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 40px rgba(52,152,219,0.30);
         }
-        .ad-url--micita { color: #5dade2; }
+        .ad-qr-container--micita canvas,
+        .ad-qr-container--micita img { display: block; }
+        .ad-micita-qr-row {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .ad-micita-site-label {
+            font-size: 16px; font-weight: 800; color: #7fb3d8;
+            letter-spacing: 1px;
+        }
         .ad-wa-row {
             display: flex; align-items: center; gap: 12px;
             font-size: 15px; font-weight: 700; color: #7fb3d8;
@@ -459,13 +468,12 @@
         .ad-wa-row i { font-size: 20px; }
 
         @media (max-width: 720px) {
-            .ad-logo-icon--micita  { width: 60px; height: 60px; font-size: 30px; }
-            .ad-brand-name--micita { font-size: 30px; }
-            .ad-brand-sub--micita  { font-size: 12px; }
-            .ad-headline--micita   { font-size: 18px; }
-            .ad-pill--micita       { font-size: 12px; padding: 8px 16px; }
-            .ad-cta-btn--micita    { font-size: 15px; padding: 13px 36px; }
-            .ad-url--micita        { font-size: 13px; }
+            .ad-logo-icon--micita      { width: 60px; height: 60px; font-size: 30px; }
+            .ad-brand-name--micita     { font-size: 30px; }
+            .ad-brand-sub--micita      { font-size: 12px; }
+            .ad-headline--micita       { font-size: 18px; }
+            .ad-pill--micita           { font-size: 12px; padding: 8px 16px; }
+            .ad-micita-site-label      { font-size: 13px; }
         }
 
         @media (max-width: 720px) {
@@ -893,9 +901,9 @@
                             <span class="ad-pill ad-pill--micita">&#128100; Gesti&oacute;n de clientes</span>
                             <span class="ad-pill ad-pill--micita">&#128179; Control de pagos</span>
                         </div>
-                        <div class="ad-cta-row">
-                            <button class="ad-cta-btn ad-cta-btn--micita">Prueba gratis &rarr;</button>
-                            <span class="ad-url ad-url--micita">micita.com.do</span>
+                        <div class="ad-micita-qr-row">
+                            <div id="qrMicita" class="ad-qr-container--micita"></div>
+                            <div class="ad-micita-site-label">Escanea para visitar &rarr; micita.com.do</div>
                         </div>
                         <div class="ad-wa-row">
                             <i class="fa-brands fa-whatsapp"></i> (829) 358-7300
@@ -1260,6 +1268,7 @@
         loadData();
         scheduleRotation();
         buildQR();
+        buildMicitaQR();
         requestAnimationFrame(autoFitLayout);
         if (document.fonts?.ready) document.fonts.ready.then(() => {});
     });
@@ -1278,17 +1287,31 @@
 
     setInterval(rotateAds, AD_ROTATE_INTERVAL);
 
-    /* ══ QR CODE ══ */
+    /* ══ QR CODE — Advertise Here (WhatsApp) ══ */
     function buildQR() {
         const el = document.getElementById('qrCode');
         if (!el || !window.QRCode) return;
-        // Size: large for vertical screen readability
         const size = Math.min(Math.round(window.innerHeight * 0.17), 260);
         new QRCode(el, {
             text: 'https://wa.me/18094937300',
             width:  size,
             height: size,
             colorDark:  '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    /* ══ QR CODE — MiCita (website) ══ */
+    function buildMicitaQR() {
+        const el = document.getElementById('qrMicita');
+        if (!el || !window.QRCode) return;
+        const size = Math.min(Math.round(window.innerHeight * 0.13), 200);
+        new QRCode(el, {
+            text: 'https://micita.com.do',
+            width:  size,
+            height: size,
+            colorDark:  '#1a252f',
             colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
         });
