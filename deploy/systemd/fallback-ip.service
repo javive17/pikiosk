@@ -1,7 +1,7 @@
 [Unit]
 Description=Static fallback IP address (192.168.1.250)
-After=network-online.target
-Wants=network-online.target
+After=NetworkManager.service
+Wants=NetworkManager.service
 
 [Service]
 Type=oneshot
